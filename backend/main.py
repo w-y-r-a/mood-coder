@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import uvicorn
 from config import is_dev, first_setup
-import database
+# import database # We will use this later
 from setup import router as setup_router
 
 app = FastAPI(
