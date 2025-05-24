@@ -1,8 +1,6 @@
 from models import Setup
 from config import config
 
-def same_key(key: str):
+def same_key(key: str) -> bool:
     key1 = config.get('Global', 'BINDING_KEY')
-    if key1 == key:
-        return True
-    return False
+    return key1 == key
