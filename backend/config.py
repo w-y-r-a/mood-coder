@@ -14,11 +14,15 @@ config_file = Path('config.ini')
 
 
 # Check if the config file exists and read it
-if config_file.exists():
-    config.read('config.ini')
-else:
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
+try:
+    if config_file.exists():
+        config.read('config.ini')
+    else:
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+except configparser.Error as e:
+    print(f"Config file corrupted, creating new one: {e}")
+    config_file.unlink()
 
 def is_dev():
     return os.getenv('ENV') == 'dev'
