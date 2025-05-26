@@ -28,10 +28,6 @@ async def root():
     return {"status": "healthy", "first_setup": first_setup, "version": app.version}
 
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    await close_db_connection()
-
 if __name__ == "__main__":
     print("Starting Mood Coder API Backend...")
     uvicorn.run(
