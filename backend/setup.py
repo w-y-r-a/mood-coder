@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
 from models import Setup
 from config import first_setup, config
+from utils import hash_key
 from database import test_db_connection
 
 router = APIRouter(prefix="/setup", tags=["Setup"])
@@ -21,7 +22,7 @@ async def start_setup(setup: Setup):
     # LAST STEP
     config['Global'] = {
         'FirstSetup': 'False',
-        'BINDING_KEY': setup.BINDING_KEY
+        'BINDING_KEY': hash_key(setup.BINDING_KEY)
     }
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
