@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import uvicorn
-from config import is_dev, first_setup
+from config import is_dev, first_setup, OLLAMA_HOST
 from database import close_db_connection
 from contextlib import asynccontextmanager
 from setup import router as setup_router
@@ -21,6 +21,10 @@ app = FastAPI(
 
 # Include all routers
 app.include_router(setup_router)
+if not first_setup:
+    if OLLAMA_HOST:
+        from ai._ollama import router as ollama_router
+        app.include_router(ollama_router)
 
 
 @app.get("/", summary="Health Check")

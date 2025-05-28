@@ -18,6 +18,11 @@ async def start_setup(setup: Setup):
     }
     if not await test_db_connection(uri=setup.MONGO_URI, db_name=setup.MONGO_DB):
         raise HTTPException(status_code=500, detail="Failed to connect to MongoDB")
+    if setup.OLLAMA:
+        config['Ollama'] = {
+            'host': setup.OLLAMA_HOST
+        }
+
 
     # LAST STEP
     config['Global'] = {

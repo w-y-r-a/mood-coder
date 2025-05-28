@@ -38,6 +38,7 @@ if not first_setup:
     try:
         MONGO_URI = os.getenv('MONGO_URI') or config.get('MONGO', 'MONGO_URI').strip('"')
         MONGO_DB = os.getenv('MONGO_DB') or config.get('MONGO', 'MONGO_DB').strip('"')
+        OLLAMA_HOST = config.get('Ollama', 'host').strip('"')
     except (configparser.NoSectionError, configparser.NoOptionError):
         # If we can't get the MongoDB settings, we should revert to first_setup
         first_setup = True
@@ -46,3 +47,4 @@ if first_setup:
     print("First time setup detected.")
     MONGO_URI = None
     MONGO_DB = None
+    OLLAMA_HOST = None
