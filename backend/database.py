@@ -6,8 +6,7 @@ from config import first_setup, MONGO_URI, MONGO_DB
 # Globals to hold the database connection and collections
 client = None
 db = None
-users = None
-logs = None
+sessions = None
 
 
 async def init_db():
@@ -15,7 +14,7 @@ async def init_db():
     Asynchronously initializes the MongoDB connection and sets global database references.
     Only initializes if first_setup is False.
     """
-    global client, db, users, logs
+    global client, db, sessions
 
     if first_setup:
         print("Skipping database initialization as first_setup is True.")
@@ -32,8 +31,7 @@ async def init_db():
 
         await client.admin.command("ping")
         db = client[MONGO_DB]
-        users = db["users"]
-        logs = db["logs"]
+        sessions = db["sessions"]
         print("MongoDB connection established successfully.")
         return True
     except ConnectionFailure as e:
@@ -71,6 +69,11 @@ async def test_db_connection(uri=None, db_name=None):
         return True
     except ConnectionFailure:
         return False
+
+
+async def get_sessions():
+    global sessions
+    return sessions
 
 
 async def close_db_connection():

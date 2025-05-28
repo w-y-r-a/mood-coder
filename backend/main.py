@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException
 import uvicorn
 from config import is_dev, first_setup, OLLAMA_HOST
-from database import close_db_connection
+from database import close_db_connection, init_db
 from contextlib import asynccontextmanager
 from setup import router as setup_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await init_db()
     yield  # Application is running
     await close_db_connection()  # This runs on shutdown
 

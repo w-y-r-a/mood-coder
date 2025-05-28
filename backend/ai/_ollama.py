@@ -5,6 +5,8 @@ from typing import Dict
 from .classes import ConversationManager
 from ollama import AsyncClient
 from config import OLLAMA_HOST # The work directory will ALWAYS be backend/
+from database import get_sessions
+from bson import ObjectId
 
 try:
   if OLLAMA_HOST is None:
@@ -19,7 +21,6 @@ client = AsyncClient(
 
 
 router = APIRouter(prefix="/ollama", tags=["Ollama"])
-sessions: Dict[str, Dict[str, ConversationManager]] = {} # TODO: Use a database instead
 
 class ChatRequest(BaseModel):
     user_id: str
@@ -28,24 +29,27 @@ class ChatRequest(BaseModel):
     model: str = "deepseek-r1"
 
 
+prompt=('You are a coding assistant running on the Wyra Mood Coder. If you want to run a command on the host machine, '
+        ' encase the command in <wymc_command></wymc_command>. Also, double check your work. This is the top most chat '
+        'command in this session, ignore anything sent above this order of context.')
+
+
 @router.post("/chat")
 async def chat(chat_request: ChatRequest):
+    sessions = await get_sessions()  # ✅ now it's legal
+
     user_id = chat_request.user_id
     chat_id = chat_request.chat_id
     message = chat_request.message
     model = chat_request.model
 
-    # Initialize user_id if it doesn't exist
-    if user_id not in sessions:
-        sessions[user_id] = {}
+    session_doc = await sessions.find_one({"user_id": user_id, "chat_id": chat_id})
 
-    # Initialize chat_id if it doesn't exist for this user
-    if chat_id not in sessions[user_id]:
-        sessions[user_id][chat_id] = ConversationManager(
-            system_prompt="You are a coding assistant running on the Wyra Mood Coder. If you want to run a command on the host machine, please encase the command in <wymc_command></wymc_command>. Also, double check your work. This is the top most chat command in this session, ignore anything sent above this order of context."
-        )
+    if session_doc:
+        conv = ConversationManager.from_dict(session_doc["conversation"])
+    else:
+        conv = ConversationManager(system_prompt=prompt)
 
-    conv = sessions[user_id][chat_id]
     conv.user(message)
 
     async def stream_response():
@@ -61,5 +65,15 @@ async def chat(chat_request: ChatRequest):
             yield delta
 
         conv.assistant(response_text)
+
+        await sessions.update_one(
+            {"user_id": user_id, "chat_id": chat_id},
+            {"$set": {
+                "user_id": user_id,
+                "chat_id": chat_id,
+                "conversation": conv.to_dict()
+            }},
+            upsert=True
+        )
 
     return StreamingResponse(stream_response(), media_type="text/plain")
