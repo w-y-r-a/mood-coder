@@ -8,7 +8,7 @@ from .setup import router as setup_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    if first_setup: await init_db()
     yield  # Application is running
     await close_db_connection()  # This runs on shutdown
 
