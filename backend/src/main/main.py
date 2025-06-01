@@ -1,13 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 import uvicorn
-from config import is_dev, first_setup
-from database import close_db_connection
+from backend.src.config import is_dev, first_setup, OLLAMA_HOST
+from backend.src.database import close_db_connection, init_db
 from contextlib import asynccontextmanager
 from setup import router as setup_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await init_db()
     yield  # Application is running
     await close_db_connection()  # This runs on shutdown
 
@@ -21,6 +22,10 @@ app = FastAPI(
 
 # Include all routers
 app.include_router(setup_router)
+if not first_setup:
+    if OLLAMA_HOST:
+        from backend.src.ai._ollama import router as ollama_router
+        app.include_router(ollama_router)
 
 
 @app.get("/", summary="Health Check")
