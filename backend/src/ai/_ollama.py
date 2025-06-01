@@ -5,7 +5,7 @@ from bson import ObjectId
 from typing import Dict
 from pydantic import BaseModel
 from .classes import ConversationManager
-from ..config import OLLAMA_HOST, OLLAMA_HEADERS # The work directory will ALWAYS be backend/
+from ..config import OLLAMA_HOST, OLLAMA_HEADERS
 from ..database import get_sessions
 
 try:

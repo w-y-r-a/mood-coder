@@ -25,7 +25,7 @@ except configparser.Error as e:
     CONFIG_FILE.unlink()
 
 def is_dev():
-    return os.getenv('ENV') == 'dev'
+    return os.getenv('ENV') == 'dev' or False
 
 # Check if the "Global" section exists, if not, first_setup should be True
 if not config.has_section('Global'):

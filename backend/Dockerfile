@@ -13,9 +13,11 @@ RUN pip install -r requirements.txt
 # Copy backend source code
 COPY . .
 
-# Set Python path and expose port
+# Set Python path to include the project root
 ENV PYTHONPATH=/backend
+
+# Expose port
 EXPOSE 8000
 
 # Run the FastAPI application
-CMD ["python", "src/main/main.py"]
+CMD ["python", "-m", "src.main.main"]
