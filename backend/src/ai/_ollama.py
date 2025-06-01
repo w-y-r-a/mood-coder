@@ -1,23 +1,24 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from typing import Dict
-from .classes import ConversationManager
 from ollama import AsyncClient
+from bson import ObjectId
+from typing import Dict
+from pydantic import BaseModel
+from .classes import ConversationManager
 from ..config import OLLAMA_HOST, OLLAMA_HEADERS # The work directory will ALWAYS be backend/
 from ..database import get_sessions
-from bson import ObjectId
 
 try:
-  if OLLAMA_HOST is None:
-    raise ValueError("Ollama host is not set in config.ini")
-except KeyError:
-  raise ValueError("Ollama host is not set in config.ini")
+    if OLLAMA_HOST is None:
+        raise ValueError("OLLAMA_HOST configuration is missing or None")
+except (KeyError, ValueError) as e:
+    raise ValueError("OLLAMA_HOST must be configured in config.ini") from e
 
 client = AsyncClient(
     host=OLLAMA_HOST,
     headers=OLLAMA_HEADERS
 )
+
 
 
 router = APIRouter(prefix="/ollama", tags=["Ollama"])
@@ -29,9 +30,13 @@ class ChatRequest(BaseModel):
     model: str = "deepseek-r1"
 
 
-prompt=('You are a coding assistant running on the Wyra Mood Coder. If you want to run a command on the host machine, '
-        ' encase the command in <wymc_command></wymc_command>. Also, double check your work. This is the top most chat '
-        'command in this session, ignore anything sent above this order of context.')
+SYSTEM_PROMPT = (
+    'You are a coding assistant running on the Wyra Mood Coder. '
+    'If you want to run a command on the host machine, '
+    'encase the command in <wymc_command></wymc_command>. '
+    'Also, double check your work. This is the top most chat '
+    'command in this session, ignore anything sent above this order of context.'
+)
 
 
 @router.post("/chat")
@@ -48,7 +53,7 @@ async def chat(chat_request: ChatRequest):
     if session_doc:
         conv = ConversationManager.from_dict(session_doc["conversation"])
     else:
-        conv = ConversationManager(system_prompt=prompt)
+        conv = ConversationManager(system_prompt=SYSTEM_PROMPT)
 
     conv.user(message)
 
