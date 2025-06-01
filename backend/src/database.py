@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConnectionFailure
-from config import first_setup, MONGO_URI, MONGO_DB
+from .config import first_setup, MONGO_URI, MONGO_DB
 
 
 # Globals to hold the database connection and collections

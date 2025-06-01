@@ -36,3 +36,11 @@ class ConversationManager:
             "chat_id": self.chat_id,
             "messages": self.messages,
         }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        obj = cls()
+        obj.user_id = data.get("user_id")
+        obj.chat_id = data.get("chat_id")
+        obj.messages = data.get("messages", [])
+        return obj

@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from typing import Dict
 from .classes import ConversationManager
 from ollama import AsyncClient
-from config import OLLAMA_HOST # The work directory will ALWAYS be backend/
-from database import get_sessions
+from ..config import OLLAMA_HOST, OLLAMA_HEADERS # The work directory will ALWAYS be backend/
+from ..database import get_sessions
 from bson import ObjectId
 
 try:
@@ -14,9 +14,9 @@ try:
 except KeyError:
   raise ValueError("Ollama host is not set in config.ini")
 
-
 client = AsyncClient(
     host=OLLAMA_HOST,
+    headers=OLLAMA_HEADERS
 )
 
 

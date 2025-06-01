@@ -10,7 +10,7 @@ class CasePreservingConfigParser(configparser.ConfigParser):
         return optionstr
 
 config = CasePreservingConfigParser()
-config_file = Path('config.ini')
+config_file = Path('../../config.ini')
 
 
 # Check if the config file exists and read it
@@ -18,7 +18,7 @@ try:
     if config_file.exists():
         config.read('config.ini')
     else:
-        with open('config.ini', 'w') as configfile:
+        with open('../../config.ini', 'w') as configfile:
             config.write(configfile)
 except configparser.Error as e:
     print(f"Config file corrupted, creating new one: {e}")
@@ -33,14 +33,23 @@ if not config.has_section('Global'):
 else:
     first_setup = config.getboolean('Global', 'FirstSetup', fallback=True)
 
+
+def optional_config(section, option, default=None):
+    try:
+        return config.get(section, option).strip('"')
+    except (configparser.NoSectionError, configparser.NoOptionError):
+        return default
+
+
 # Only try to get MongoDB settings if we're not in first_setup
 if not first_setup:
     try:
         MONGO_URI = os.getenv('MONGO_URI') or config.get('MONGO', 'MONGO_URI').strip('"')
         MONGO_DB = os.getenv('MONGO_DB') or config.get('MONGO', 'MONGO_DB').strip('"')
         OLLAMA_HOST = config.get('Ollama', 'host').strip('"')
+        OLLAMA_HEADERS =  optional_config("Ollama", "headers")
     except (configparser.NoSectionError, configparser.NoOptionError):
-        # If we can't get the MongoDB settings, we should revert to first_setup
+        # If we can't get the settings, we should revert to first_setup
         first_setup = True
 
 if first_setup:

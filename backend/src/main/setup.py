@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Response
-from models import Setup
-from config import first_setup, config
-from utils import hash_key
-from database import test_db_connection
+from fastapi import APIRouter, HTTPException
+from backend.src.main.models import Setup
+from backend.src.config import first_setup, config
+from backend.src.main.utils import hash_key
+from backend.src.database import test_db_connection
 
 router = APIRouter(prefix="/setup", tags=["Setup"])
 
@@ -29,7 +29,7 @@ async def start_setup(setup: Setup):
         'FirstSetup': 'False',
         'BINDING_KEY': hash_key(setup.BINDING_KEY)
     }
-    with open('config.ini', 'w') as configfile:
+    with open('../../config.ini', 'w') as configfile:
         config.write(configfile)
 
     return {"message": "Setup completed successfully."}

@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 import uvicorn
-from config import is_dev, first_setup, OLLAMA_HOST
-from database import close_db_connection, init_db
+from backend.src.config import is_dev, first_setup, OLLAMA_HOST
+from backend.src.database import close_db_connection, init_db
 from contextlib import asynccontextmanager
 from setup import router as setup_router
 
@@ -24,7 +24,7 @@ app = FastAPI(
 app.include_router(setup_router)
 if not first_setup:
     if OLLAMA_HOST:
-        from ai._ollama import router as ollama_router
+        from backend.src.ai._ollama import router as ollama_router
         app.include_router(ollama_router)
 
 
